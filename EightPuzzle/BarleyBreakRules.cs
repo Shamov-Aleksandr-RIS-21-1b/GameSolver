@@ -15,7 +15,7 @@ public class BarleyBreakRules : IGameRules<BarleyBreakState>
 
 	public IEnumerable<BarleyBreakState> GetChildStates(BarleyBreakState currentState)
 	{
-		var currentZeroPos = currentState.Matrix.GetZeroPos();
+		var currentZeroPos = currentState.Field.GetZeroPos();
 		var childZeroPoses = new List<Position>();
 
 		// LEFT
@@ -64,17 +64,17 @@ public class BarleyBreakRules : IGameRules<BarleyBreakState>
 
 		return childZeroPoses.Select(childZeroPos => new BarleyBreakState
 		{
-			Matrix = currentState.Matrix.Swap(currentZeroPos, childZeroPos),
+			Field = currentState.Field.Swap(currentZeroPos, childZeroPos),
 			Depth = currentState.Depth + 1
 		});
 	}
 
 	public bool IsFinalState(BarleyBreakState currentState) =>
-		GameFieldComparer.Instance.Equals(currentState.Matrix, _finalMatrix);
+		GameFieldComparer.Instance.Equals(currentState.Field, _finalMatrix);
 
 	public double EvalF(BarleyBreakState currentState, out double[] parameters)
 	{
-		var g = GetMissplasedTilesCount(currentState.Matrix, _finalMatrix);
+		var g = GetMissplasedTilesCount(currentState.Field, _finalMatrix);
 		var h = currentState.Depth;
 		var f = g + h;
 

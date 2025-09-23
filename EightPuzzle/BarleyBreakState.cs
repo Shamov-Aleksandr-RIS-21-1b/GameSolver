@@ -2,7 +2,7 @@ namespace GameSolver.EightPuzzle;
 
 public class BarleyBreakState
 {
-    public byte[,] Matrix { get; init; } = null!;
+    public byte[,] Field { get; init; } = null!;
 
     public int Depth { get; internal init; } = 0;
 }

@@ -5,11 +5,11 @@ public class BarleyBreakStateEqualityComparer : IEqualityComparer<BarleyBreakSta
 {
 	public bool Equals(BarleyBreakState? x, BarleyBreakState? y)
 	{
-		return GameFieldComparer.Instance.Equals(x.Matrix, y.Matrix);
+		return GameFieldComparer.Instance.Equals(x.Field, y.Field);
 	}
 
 	public int GetHashCode([DisallowNull] BarleyBreakState obj)
 	{
-		return GameFieldComparer.Instance.GetHashCode(obj.Matrix);
+		return GameFieldComparer.Instance.GetHashCode(obj.Field);
 	}
 }
