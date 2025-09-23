@@ -2,7 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace GameSolver.EightPuzzle;
 
-public class GameFieldComparer : IEqualityComparer<byte[,]>
+internal class GameFieldComparer : IEqualityComparer<byte[,]>
 {
     public static readonly GameFieldComparer Instance = new();
 

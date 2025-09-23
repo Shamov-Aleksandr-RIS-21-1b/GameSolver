@@ -1,6 +1,6 @@
 namespace GameSolver.EightPuzzle;
 
-public static class MatrixExtensions
+internal static class MatrixExtensions
 {
     public static Position GetZeroPos(this byte[,] matrix)
     {

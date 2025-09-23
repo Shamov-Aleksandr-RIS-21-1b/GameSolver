@@ -2,18 +2,18 @@ using GameSolver.Engine;
 
 namespace GameSolver.EightPuzzle;
 
-public class EightPuzzleRules : IGameRules<EightPuzzleState>
+public class BarleyBreakRules : IGameRules<BarleyBreakState>
 {
 	private readonly byte[,] _finalMatrix;
 	private readonly int _gameSize;
 
-	public EightPuzzleRules(byte[,] finalState)
+	public BarleyBreakRules(byte[,] finalState)
 	{
 		_finalMatrix = finalState;
 		_gameSize = _finalMatrix.GetLength(0);
 	}
 
-	public IEnumerable<EightPuzzleState> GetChildStates(EightPuzzleState currentState)
+	public IEnumerable<BarleyBreakState> GetChildStates(BarleyBreakState currentState)
 	{
 		var currentZeroPos = currentState.Matrix.GetZeroPos();
 		var childZeroPoses = new List<Position>();
@@ -62,17 +62,17 @@ public class EightPuzzleRules : IGameRules<EightPuzzleState>
 			childZeroPoses.Add(nextZeroPos);
 		}
 
-		return childZeroPoses.Select(childZeroPos => new EightPuzzleState
+		return childZeroPoses.Select(childZeroPos => new BarleyBreakState
 		{
 			Matrix = currentState.Matrix.Swap(currentZeroPos, childZeroPos),
 			Depth = currentState.Depth + 1
 		});
 	}
 
-	public bool IsFinalState(EightPuzzleState currentState) =>
+	public bool IsFinalState(BarleyBreakState currentState) =>
 		GameFieldComparer.Instance.Equals(currentState.Matrix, _finalMatrix);
 
-	public double EvalF(EightPuzzleState currentState, out double[] parameters)
+	public double EvalF(BarleyBreakState currentState, out double[] parameters)
 	{
 		var g = GetMissplasedTilesCount(currentState.Matrix, _finalMatrix);
 		var h = currentState.Depth;
