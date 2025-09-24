@@ -7,19 +7,19 @@ using Microsoft.Msagl.GraphViewerGdi;
 
 internal class Program
 {
+    private static readonly Dictionary<(int, int), string> DirectionMap = new()
+    {
+        [(-1, 0)] = "вверх",
+        [(+1, 0)] = "вниз",
+        [(0, -1)] = "влево",
+        [(0, +1)] = "вправо",
+    };
+
     [STAThread]
     private static void Main(string[] args)
     {
         Application.EnableVisualStyles();
         Application.SetCompatibleTextRenderingDefault(false);
-
-        Dictionary<(int, int), string> DirectionMap = new()
-        {
-            [(-1, 0)] = "вверх",
-            [(+1, 0)] = "вниз",
-            [(0, -1)] = "влево",
-            [(0, +1)] = "вправо",
-        };
 
         var startState = new BarleyBreakState
         {
@@ -38,19 +38,20 @@ internal class Program
             {7, 8, 0}
         };
 
-        var eightPuzzleRules = new BarleyBreakRules(finalField);
-
+        var barleyBreakRules = new BarleyBreakRules(finalField);
         var comparer = new BarleyBreakStateEqualityComparer();
-        var gameTree = Solver.Solve(startState, eightPuzzleRules, comparer);
+
+        var gameTree = Solver.Solve(startState, barleyBreakRules, comparer);
+
         var finalNode = gameTree.Leafs.Peek();
         var kpd = (finalNode.GameState.Depth + 1f) / gameTree.Cache.Count * 100;
 
         var graph = new Graph("BarleyBreak");
-        var currentNodes = new List<GameNode<BarleyBreakState>> { gameTree.Root };
-        while (currentNodes.Count > 0)
+        var currentDepthNodes = new List<GameNode<BarleyBreakState>> { gameTree.Root };
+        while (currentDepthNodes.Count > 0)
         {
-            var nextLevelAllChilds = new List<GameNode<BarleyBreakState>>(4);
-            foreach (var current in currentNodes)
+            var nextDepthAllChilds = new List<GameNode<BarleyBreakState>>(4);
+            foreach (var current in currentDepthNodes)
             {
                 var source = MatrixToString(current.GameState.Field);
                 var sourceZeroPos = current.GameState.Field.GetZeroPos();
@@ -60,10 +61,10 @@ internal class Program
                     var targetZeroPos = currentChild.GameState.Field.GetZeroPos();
                     var direction = DirectionMap[(targetZeroPos.Row - sourceZeroPos.Row, targetZeroPos.Col - sourceZeroPos.Col)];
                     graph.AddEdge(source, direction, target);
-                    nextLevelAllChilds.Add(currentChild);
+                    nextDepthAllChilds.Add(currentChild);
                 }
             }
-            currentNodes = nextLevelAllChilds;
+            currentDepthNodes = nextDepthAllChilds;
         }
 
         var currentNode = finalNode;
@@ -82,22 +83,18 @@ internal class Program
 
         var mainForm = new Form();
 
-        mainForm.SuspendLayout();
         mainForm.Controls.Add(new System.Windows.Forms.Label()
         {
             Text = $"КПД = {kpd}%\nГлубина = {finalNode.GameState.Depth + 1}\nРассмотренно ходов = {gameTree.Cache.Count}",
             AutoSize = true,
             Top = 20,
         });
-        mainForm.ResumeLayout();
 
-        mainForm.SuspendLayout();
         mainForm.Controls.Add(new GViewer
         {
             Graph = graph,
             Dock = DockStyle.Fill,
         });
-        mainForm.ResumeLayout();
 
         /// PLOTTING
 
@@ -105,10 +102,12 @@ internal class Program
         plotArea.AxisX.Minimum = 1;
         plotArea.AxisX.Maximum = gameTree.Trace.Count;
         plotArea.AxisX.Interval = 1;
+        plotArea.AxisX.Title = "Номер хода";
         plotArea.AxisY.Maximum = 8;
         plotArea.AxisY.Interval = 1;
+        plotArea.AxisY.Title = "G (ошибка)";
         
-        var series = new Series("My Data");
+        var series = new Series();
         series.BorderWidth = 5;
         series.ChartType = SeriesChartType.Line;
         series.MarkerStyle = MarkerStyle.Circle;
@@ -126,9 +125,7 @@ internal class Program
         plot.Dock = DockStyle.Fill;
 
         var plotForm = new Form();
-        plotForm.SuspendLayout();
         plotForm.Controls.Add(plot);
-        plotForm.ResumeLayout();
 
         mainForm.Show();
         plotForm.Show();
