@@ -107,7 +107,7 @@ internal class Program
         var plotArea = new ChartArea();
         plotArea.AxisX.Minimum = 1;
         plotArea.AxisX.Maximum = gameTree.Trace.Count;
-        plotArea.AxisX.Interval = 1;
+        plotArea.AxisX.Interval = gameTree.Trace.Count > 100 ? 10 : 1;
         plotArea.AxisX.Title = "Номер хода";
         plotArea.AxisY.Maximum = 8;
         plotArea.AxisY.Interval = 1;
@@ -124,10 +124,10 @@ internal class Program
         plotArea.AxisY.ScrollBar.Enabled = true;
 
         var series = new Series();
-        series.BorderWidth = 5;
+        series.BorderWidth = 3;
         series.ChartType = SeriesChartType.Line;
         series.MarkerStyle = MarkerStyle.Circle;
-        series.MarkerSize = 15;
+        series.MarkerSize = 5;
         for (var i = 0; i < gameTree.Trace.Count; ++i)
         {
             var x = i + 1;

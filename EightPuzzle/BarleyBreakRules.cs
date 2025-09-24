@@ -76,7 +76,7 @@ public class BarleyBreakRules : IGameRules<BarleyBreakState>
 	{
 		var g = GetMissplasedTilesCount(currentState.Field, _finalMatrix);
 		var h = currentState.Depth;
-		var f = g + 0.35 * h;
+		var f = 4.3 * g + 0.35 * h; // 4.5
 
 		parameters = [g, h];
 
