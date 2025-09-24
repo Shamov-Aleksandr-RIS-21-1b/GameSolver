@@ -1,11 +1,17 @@
 using System.Text;
-using System.Windows.Controls;
-using System.Windows.Media;
+using System.Windows.Forms.DataVisualization.Charting;
 using GameSolver.EightPuzzle;
 using GameSolver.Engine;
 using Microsoft.Msagl.Drawing;
 using Microsoft.Msagl.GraphViewerGdi;
 
+Dictionary<(int, int), string> DirectionMap = new()
+{
+    [(-1, 0)] = "вверх",
+    [(+1, 0)] = "вниз",
+    [(0, -1)] = "влево",
+    [(0, +1)] = "вправо",
+};
 
 var startState = new BarleyBreakState
 {
@@ -39,49 +45,52 @@ while (currentNodes.Count > 0)
     foreach (var current in currentNodes)
     {
         var source = MatrixToString(current.GameState.Field);
+        var sourceZeroPos = current.GameState.Field.GetZeroPos();
         foreach (var currentChild in current.Childs)
         {
             var target = MatrixToString(currentChild.GameState.Field);
-            graph.AddEdge(source, string.Empty, target);
+            var targetZeroPos = currentChild.GameState.Field.GetZeroPos();
+            var direction = DirectionMap[(targetZeroPos.Row - sourceZeroPos.Row, targetZeroPos.Col - sourceZeroPos.Col)];
+            graph.AddEdge(source, direction, target);
             nextLevelAllChilds.Add(currentChild);
         }
     }
     currentNodes = nextLevelAllChilds;
 }
 
-var solution = gameTree.Leafs.Peek();
-while (solution != null)
+var currentNode = finalNode;
+while (currentNode != null)
 {
-    if (solution.Parent != null)
+    if (currentNode.Parent != null)
     {
-        var nodeId = MatrixToString(solution.GameState.Field);
+        var nodeId = MatrixToString(currentNode.GameState.Field);
         var parentEdge = graph.FindNode(nodeId).InEdges.First();
         parentEdge.Attr.Color = Microsoft.Msagl.Drawing.Color.Red;
     }
-    solution = solution.Parent;
+    currentNode = currentNode.Parent;
 }
-
-var viewer = new GViewer
-{
-    Graph = graph,
-    Dock = DockStyle.Fill,
-};
 
 var form = new Form();
 
-var label = new System.Windows.Forms.Label()
+form.SuspendLayout();
+form.Controls.Add(new System.Windows.Forms.Label()
 {
     Text = $"КПД = {kpd}%",
     AutoSize = true,
     Top = 20,
-};
-
-form.SuspendLayout();
-form.Controls.Add(label);
+});
 form.ResumeLayout();
 
 form.SuspendLayout();
-form.Controls.Add(viewer);
+form.Controls.Add(new GViewer
+{
+    Graph = graph,
+    Dock = DockStyle.Fill,
+});
+form.ResumeLayout();
+
+form.SuspendLayout();
+form.Controls.Add(new Chart());
 form.ResumeLayout();
 
 form.ShowDialog();
@@ -91,7 +100,6 @@ static string MatrixToString(byte[,] matrix)
     var sb = new StringBuilder((matrix.GetLength(0) + 1) * matrix.GetLength(1));
     for (var i = 0; i < matrix.GetLength(0); ++i)
     {
-        //sb.Append('');
         for (var j = 0; j < matrix.GetLength(1) - 1; ++j)
         {
             sb.Append(matrix[i, j]);
