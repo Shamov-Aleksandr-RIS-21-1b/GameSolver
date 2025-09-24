@@ -25,17 +25,23 @@ internal class Program
         {
             Field = new byte[3, 3]
             {
-                {2, 4, 3},
-                {1, 8, 5},
-                {7, 0, 6}
+                //{2, 4, 3},
+                //{1, 8, 5},
+                //{7, 0, 6}
+                {2, 1, 6},
+                {4, 0, 8},
+                {7, 5, 3}
             }
         };
 
         var finalField = new byte[3, 3]
         {
+            //{1, 2, 3},
+            //{4, 5, 6},
+            //{7, 8, 0}
             {1, 2, 3},
-            {4, 5, 6},
-            {7, 8, 0}
+            {8, 0, 4},
+            {7, 6, 5}
         };
 
         var barleyBreakRules = new BarleyBreakRules(finalField);
@@ -106,7 +112,17 @@ internal class Program
         plotArea.AxisY.Maximum = 8;
         plotArea.AxisY.Interval = 1;
         plotArea.AxisY.Title = "G (ошибка)";
-        
+
+        plotArea.CursorX.IsUserEnabled = true;
+        plotArea.CursorX.IsUserSelectionEnabled = true;
+        plotArea.CursorY.IsUserEnabled = true;
+        plotArea.CursorY.IsUserSelectionEnabled = true;
+
+        plotArea.AxisX.ScaleView.Zoomable = true;
+        plotArea.AxisY.ScaleView.Zoomable = true;
+        plotArea.AxisX.ScrollBar.Enabled = true;
+        plotArea.AxisY.ScrollBar.Enabled = true;
+
         var series = new Series();
         series.BorderWidth = 5;
         series.ChartType = SeriesChartType.Line;
