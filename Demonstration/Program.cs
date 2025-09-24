@@ -75,7 +75,7 @@ var form = new Form();
 form.SuspendLayout();
 form.Controls.Add(new System.Windows.Forms.Label()
 {
-    Text = $"КПД = {kpd}%",
+    Text = $"КПД = {kpd}%\nГлубина = {finalNode.GameState.Depth + 1}\nРассмотренно ходов = {gameTree.Cache.Count}",
     AutoSize = true,
     Top = 20,
 });
