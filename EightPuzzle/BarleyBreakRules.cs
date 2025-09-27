@@ -75,14 +75,15 @@ public class BarleyBreakRules : IGameRules<BarleyBreakState, BarleyBreakTraceDat
 
 	public double EvalF(BarleyBreakState currentState, out BarleyBreakTraceData parameters)
 	{
-		var g = GetDistance(currentState.Field);
+		var g = GetMissplasedTilesCount(currentState.Field);
+        var k = GetDistance(currentState.Field);
         var h = currentState.Depth;
-        var f = g + 0.35 * h;
+        var f = k + 0.35 * h;
 
         parameters = new BarleyBreakTraceData
 		{
-            MissplacedTilesCount = GetMissplasedTilesCount(currentState.Field),
-			Distance = g,
+            MissplacedTilesCount = g,
+			Distance = k,
         };
 
 		return f;

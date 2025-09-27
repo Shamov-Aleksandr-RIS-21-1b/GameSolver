@@ -1,4 +1,4 @@
-using System.Text;
+п»їusing System.Text;
 using System.Windows.Forms.DataVisualization.Charting;
 using BarleyBreak;
 using GameSolver.EightPuzzle;
@@ -10,10 +10,10 @@ internal class Program
 {
     private static readonly Dictionary<(int, int), string> DirectionMap = new()
     {
-        [(-1, 0)] = "вверх",
-        [(+1, 0)] = "вниз",
-        [(0, -1)] = "влево",
-        [(0, +1)] = "вправо",
+        [(-1, 0)] = "в†‘",
+        [(+1, 0)] = "в†“",
+        [(0, -1)] = "в†ђ",
+        [(0, +1)] = "в†’",
     };
 
     [STAThread]
@@ -82,6 +82,7 @@ internal class Program
                 var nodeId = MatrixToString(currentNode.GameState.Field);
                 var parentEdge = graph.FindNode(nodeId).InEdges.First();
                 parentEdge.Attr.Color = Microsoft.Msagl.Drawing.Color.Red;
+                parentEdge.Label.FontColor = Microsoft.Msagl.Drawing.Color.Green;
             }
             currentNode = currentNode.Parent;
         }
@@ -92,7 +93,7 @@ internal class Program
 
         mainForm.Controls.Add(new System.Windows.Forms.Label()
         {
-            Text = $"КПД = {kpd}%\nГлубина = {finalNode.GameState.Depth + 1}\nРассмотренно ходов = {gameTree.Cache.Count}",
+            Text = $"РљРџР” = {kpd}%\nР“Р»СѓР±РёРЅР° = {finalNode.GameState.Depth + 1}\nР Р°СЃСЃРјРѕС‚СЂРµРЅРЅРѕ С…РѕРґРѕРІ = {gameTree.Cache.Count}",
             AutoSize = true,
             Top = 20,
         });
@@ -105,14 +106,41 @@ internal class Program
 
         /// PLOTTING
 
+        var missplacedTilesTrace = new Series();
+        missplacedTilesTrace.BorderWidth = 3;
+        missplacedTilesTrace.ChartType = SeriesChartType.Line;
+        missplacedTilesTrace.MarkerStyle = MarkerStyle.Circle;
+        missplacedTilesTrace.MarkerSize = 5;
+        for (var i = 0; i < gameTree.Trace.Count; ++i)
+        {
+            var x = i + 1;
+            var y = gameTree.Trace[i].MissplacedTilesCount; // G
+            missplacedTilesTrace.Points.AddXY(x, y);
+        }
+
+        var distanceTrace = new Series();
+        distanceTrace.BorderWidth = 3;
+        distanceTrace.ChartType = SeriesChartType.Line;
+        distanceTrace.MarkerStyle = MarkerStyle.Circle;
+        distanceTrace.MarkerSize = 5;
+        distanceTrace.Color = System.Drawing.Color.Magenta;
+        var maxDistance = 0;
+        for (var i = 0; i < gameTree.Trace.Count; ++i)
+        {
+            var x = i + 1;
+            var y = gameTree.Trace[i].Distance; // G
+            distanceTrace.Points.AddXY(x, y);
+            maxDistance = (int)Math.Max(maxDistance, y);
+        }
+
         var plotArea = new ChartArea();
         plotArea.AxisX.Minimum = 1;
         plotArea.AxisX.Maximum = gameTree.Trace.Count;
         plotArea.AxisX.Interval = gameTree.Trace.Count > 100 ? 10 : 1;
-        plotArea.AxisX.Title = "Номер хода";
-        plotArea.AxisY.Maximum = 8;
+        plotArea.AxisX.Title = "РќРѕРјРµСЂ С…РѕРґР°";
+        plotArea.AxisY.Maximum = maxDistance;
         plotArea.AxisY.Interval = 1;
-        plotArea.AxisY.Title = "G (ошибка)";
+        plotArea.AxisY.Title = "РћС€РёР±РєР°";
 
         plotArea.CursorX.IsUserEnabled = true;
         plotArea.CursorX.IsUserSelectionEnabled = true;
@@ -124,21 +152,10 @@ internal class Program
         plotArea.AxisX.ScrollBar.Enabled = true;
         plotArea.AxisY.ScrollBar.Enabled = true;
 
-        var series = new Series();
-        series.BorderWidth = 3;
-        series.ChartType = SeriesChartType.Line;
-        series.MarkerStyle = MarkerStyle.Circle;
-        series.MarkerSize = 5;
-        for (var i = 0; i < gameTree.Trace.Count; ++i)
-        {
-            var x = i + 1;
-            var y = gameTree.Trace[i].MissplacedTilesCount; // G
-            series.Points.AddXY(x, y);
-        }
-
         var plot = new Chart();
         plot.ChartAreas.Add(plotArea);
-        plot.Series.Add(series);
+        plot.Series.Add(missplacedTilesTrace);
+        plot.Series.Add(distanceTrace);
         plot.Dock = DockStyle.Fill;
 
         var plotForm = new Form();
