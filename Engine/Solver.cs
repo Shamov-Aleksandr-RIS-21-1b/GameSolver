@@ -2,16 +2,16 @@ namespace GameSolver.Engine;
 
 public static class Solver
 {
-	public static GameTree<TState> Solve<TState>(TState initialState, IGameRules<TState> rules, IEqualityComparer<TState>? statesComparer = null)
+	public static GameTree<TState, TTraceData> Solve<TState, TTraceData>(TState initialState, IGameRules<TState, TTraceData> rules, IEqualityComparer<TState>? statesComparer = null)
 	{
-		var initialF = rules.EvalF(initialState, out var parameters);
-		var gameTree = new GameTree<TState>(statesComparer)
+		var initialF = rules.EvalF(initialState, out var traceData);
+		var gameTree = new GameTree<TState, TTraceData>(statesComparer)
 		{
-			Root = new GameNode<TState>
+			Root = new GameNode<TState, TTraceData>
 			{
 				GameState = initialState,
-				Params = parameters
-			}
+				TraceData = traceData
+            }
 		};
 		gameTree.Cache.Add(initialState);
 		gameTree.Leafs.Enqueue(gameTree.Root, initialF);
@@ -19,7 +19,7 @@ public static class Solver
 		for (; ; )
 		{
 			var currentNode = gameTree.Leafs.Peek();
-			gameTree.Trace.Add(currentNode);
+			gameTree.Trace.Add(currentNode.TraceData);
 			var currentState = currentNode.GameState;
 			if (rules.IsFinalState(currentState))
 				break;
@@ -30,12 +30,12 @@ public static class Solver
 			foreach (var childState in childStates)
 			{
 				gameTree.Cache.Add(childState);
-				var childF = rules.EvalF(childState, out parameters);
-				var childNode = new GameNode<TState>
+				var childF = rules.EvalF(childState, out traceData);
+				var childNode = new GameNode<TState, TTraceData>
 				{
 					GameState = childState,
-					Params = parameters
-				};
+					TraceData = traceData
+                };
 				currentNode.AddChild(childNode);
 
 				gameTree.Leafs.Enqueue(childNode, childF);

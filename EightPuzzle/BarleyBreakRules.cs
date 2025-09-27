@@ -1,8 +1,9 @@
+using BarleyBreak;
 using GameSolver.Engine;
 
 namespace GameSolver.EightPuzzle;
 
-public class BarleyBreakRules : IGameRules<BarleyBreakState>
+public class BarleyBreakRules : IGameRules<BarleyBreakState, BarleyBreakTraceData>
 {
 	private readonly byte[,] _finalMatrix;
 	private readonly int _gameSize;
@@ -15,7 +16,7 @@ public class BarleyBreakRules : IGameRules<BarleyBreakState>
 
 	public IEnumerable<BarleyBreakState> GetChildStates(BarleyBreakState currentState)
 	{
-		var currentZeroPos = currentState.Field.GetZeroPos();
+		var currentZeroPos = currentState.Field.GetPosition(0);
 		var childZeroPoses = new List<Position>();
 
 		// LEFT
@@ -72,18 +73,22 @@ public class BarleyBreakRules : IGameRules<BarleyBreakState>
 	public bool IsFinalState(BarleyBreakState currentState) =>
 		GameFieldComparer.Instance.Equals(currentState.Field, _finalMatrix);
 
-	public double EvalF(BarleyBreakState currentState, out double[] parameters)
+	public double EvalF(BarleyBreakState currentState, out BarleyBreakTraceData parameters)
 	{
-		var g = GetMissplasedTilesCount(currentState.Field, _finalMatrix);
-		var h = currentState.Depth;
-		var f = 4.3 * g + 0.35 * h; // 4.5
+		var g = GetDistance(currentState.Field);
+        var h = currentState.Depth;
+        var f = g + 0.35 * h;
 
-		parameters = [g, h];
+        parameters = new BarleyBreakTraceData
+		{
+            MissplacedTilesCount = GetMissplasedTilesCount(currentState.Field),
+			Distance = g,
+        };
 
 		return f;
 	}
 
-	private byte GetMissplasedTilesCount(byte[,] currentState, byte[,] finalState)
+	private byte GetMissplasedTilesCount(byte[,] currentState)
 	{
 		byte missplasedTilesCount = 0;
 
@@ -91,11 +96,25 @@ public class BarleyBreakRules : IGameRules<BarleyBreakState>
 		{
 			for (var j = 0; j < _gameSize; ++j)
 			{
-				if (currentState[i, j] != finalState[i, j])
+				if (currentState[i, j] != _finalMatrix[i, j])
 					++missplasedTilesCount;
 			}
 		}
 
 		return missplasedTilesCount;
 	}
+    private byte GetDistance(byte[,] currentState)
+    {
+        byte distance = 0;
+        for (var i = 0; i < _gameSize; ++i)
+        {
+            for (var j = 0; j < _gameSize; ++j)
+            {
+                var toFind = _finalMatrix[i, j];
+                var currentPosition = currentState.GetPosition(toFind);
+                distance += (byte)(Math.Abs(currentPosition.Row - i) + Math.Abs(currentPosition.Col - j));
+            }
+        }
+        return distance;
+    }
 }

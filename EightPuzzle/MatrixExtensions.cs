@@ -2,13 +2,13 @@ namespace GameSolver.EightPuzzle;
 
 public static class MatrixExtensions
 {
-    public static Position GetZeroPos(this byte[,] matrix)
+    public static Position GetPosition(this byte[,] matrix, byte toFind)
     {
         for (var i = 0; i < matrix.GetLength(0); ++i)
         {
             for (var j = 0; j < matrix.GetLength(1); ++j)
             {
-                if (matrix[i, j] == 0)
+                if (matrix[i, j] == toFind)
                     return new Position
                     {
                         Row = i,

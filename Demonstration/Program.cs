@@ -1,5 +1,6 @@
 using System.Text;
 using System.Windows.Forms.DataVisualization.Charting;
+using BarleyBreak;
 using GameSolver.EightPuzzle;
 using GameSolver.Engine;
 using Microsoft.Msagl.Drawing;
@@ -53,18 +54,18 @@ internal class Program
         var kpd = (finalNode.GameState.Depth + 1f) / gameTree.Cache.Count * 100;
 
         var graph = new Graph("BarleyBreak");
-        var currentDepthNodes = new List<GameNode<BarleyBreakState>> { gameTree.Root };
+        var currentDepthNodes = new List<GameNode<BarleyBreakState, BarleyBreakTraceData>> { gameTree.Root };
         while (currentDepthNodes.Count > 0)
         {
-            var nextDepthAllChilds = new List<GameNode<BarleyBreakState>>(4);
+            var nextDepthAllChilds = new List<GameNode<BarleyBreakState, BarleyBreakTraceData>>(4);
             foreach (var current in currentDepthNodes)
             {
                 var source = MatrixToString(current.GameState.Field);
-                var sourceZeroPos = current.GameState.Field.GetZeroPos();
+                var sourceZeroPos = current.GameState.Field.GetPosition(0);
                 foreach (var currentChild in current.Childs)
                 {
                     var target = MatrixToString(currentChild.GameState.Field);
-                    var targetZeroPos = currentChild.GameState.Field.GetZeroPos();
+                    var targetZeroPos = currentChild.GameState.Field.GetPosition(0);
                     var direction = DirectionMap[(targetZeroPos.Row - sourceZeroPos.Row, targetZeroPos.Col - sourceZeroPos.Col)];
                     graph.AddEdge(source, direction, target);
                     nextDepthAllChilds.Add(currentChild);
@@ -131,7 +132,7 @@ internal class Program
         for (var i = 0; i < gameTree.Trace.Count; ++i)
         {
             var x = i + 1;
-            var y = gameTree.Trace[i].Params[0]; // G
+            var y = gameTree.Trace[i].MissplacedTilesCount; // G
             series.Points.AddXY(x, y);
         }
 
