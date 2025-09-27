@@ -83,6 +83,7 @@ internal class Program
                 var parentEdge = graph.FindNode(nodeId).InEdges.First();
                 parentEdge.Attr.Color = Microsoft.Msagl.Drawing.Color.Red;
                 parentEdge.Label.FontColor = Microsoft.Msagl.Drawing.Color.Green;
+                parentEdge.Label.Text = currentNode.GameState.Depth + parentEdge.Label.Text;
             }
             currentNode = currentNode.Parent;
         }
